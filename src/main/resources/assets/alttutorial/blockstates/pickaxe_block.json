@@ -1,0 +1,7 @@
+{
+    "variants": {
+        "": {
+            "model": "alttutorial:block/pickaxe_block"
+        }
+    }
+}

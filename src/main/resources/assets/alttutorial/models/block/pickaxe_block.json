@@ -1,0 +1,6 @@
+{
+    "parent": "block/cube_all",
+    "textures": {
+        "all": "alttutorial:blocks/pickaxe_block"
+    }
+}
