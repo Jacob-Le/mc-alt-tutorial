@@ -1,0 +1,21 @@
+{
+  "type": "alttutorial:mine_marker",
+
+  "start_pool": "alttutorial:mine_marker",
+
+  "size": 2,
+
+  "max_distance_from_center": 80,
+
+  "biomes": "#alttutorial:has_structure/mine_marker",
+
+  "step": "surface_structures",
+
+  "start_height": {
+    "absolute": 0
+  },
+  "project_start_to_heightmap": "WORLD_SURFACE_WG",
+  "spawn_overrides": {
+
+  }
+}

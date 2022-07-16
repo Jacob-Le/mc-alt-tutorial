@@ -1,7 +1,8 @@
 {
     "variants": {
-        "": {
-            "model": "alttutorial:block/pickaxe_block"
-        }
+        "facing=north": { "model": "alttutorial:block/pickaxe_block" },
+        "facing=east": { "model": "alttutorial:block/pickaxe_block", "y": 90 },
+        "facing=south": { "model": "alttutorial:block/pickaxe_block", "y": 180 },
+        "facing=west": { "model": "alttutorial:block/pickaxe_block", "y": 270 }
     }
 }

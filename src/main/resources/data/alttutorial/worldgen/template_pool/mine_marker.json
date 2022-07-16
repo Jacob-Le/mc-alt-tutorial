@@ -1,0 +1,15 @@
+{
+  "name": "alttutorial:mine_marker",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "location": "alttutorial:mine_marker",
+        "processors": "alttutorial:randomize_stone",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    }
+  ]
+}

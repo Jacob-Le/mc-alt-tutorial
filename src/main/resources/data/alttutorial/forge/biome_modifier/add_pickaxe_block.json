@@ -1,0 +1,5 @@
+{
+    "type": "alttutorial:overworld",
+    "biomes": "#minecraft:is_overworld",
+    "feature": "alttutorial:pickaxe_block_placed"
+}

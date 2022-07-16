@@ -1,0 +1,10 @@
+{
+    "item.alttutorial.pickaxe_block": "Pickaxe Block (Item)",
+    "block.alttutorial.pickaxe_block": "Pickaxe Block",
+
+    "alttutorial.access.title": "Access the Workbench",
+    "alttutorial.access.description": "Press ",
+
+    "alttutorial.craft.title": "Collect the item you've just crafted",
+    "alttutorial.craft.description": "Use "
+}

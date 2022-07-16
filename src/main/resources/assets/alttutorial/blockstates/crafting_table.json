@@ -1,0 +1,6 @@
+{
+    "variants": {
+        "lit=true": { "model": "alttutorial:block/crafting_table_off" },
+        "lit=false": { "model": "minecraft:crafting_table" }
+    }
+}

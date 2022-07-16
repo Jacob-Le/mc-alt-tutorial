@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "alttutorial:mine_marker",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 1224476880,
+    "spacing": 5,
+    "separation": 3
+  }
+}

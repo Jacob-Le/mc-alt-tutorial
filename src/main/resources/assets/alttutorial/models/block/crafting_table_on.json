@@ -1,0 +1,6 @@
+{
+    "parent": "block/cube_all",
+    "textures": {
+        "all": "alttutorial:block/crafting_table_on"
+    }
+}
