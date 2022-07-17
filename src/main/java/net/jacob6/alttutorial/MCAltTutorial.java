@@ -76,7 +76,7 @@ public class MCAltTutorial
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event)
         {
-            
+            Messages.register();
         }
     }
 }

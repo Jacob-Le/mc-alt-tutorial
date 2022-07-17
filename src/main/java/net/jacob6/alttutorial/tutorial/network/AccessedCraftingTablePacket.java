@@ -1,15 +1,12 @@
 package net.jacob6.alttutorial.tutorial.network;
 
-import com.google.common.base.Supplier;
+import java.util.function.Supplier;
 
-import net.jacob6.alttutorial.tutorial.client.ModClientPacketHandler;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
 
-public class AccessedCraftingTablePacket {
+public class AccessedCraftingTablePacket{
     public AccessedCraftingTablePacket() {
         
     }
@@ -29,5 +26,6 @@ public class AccessedCraftingTablePacket {
             ServerPlayer player = ctx.getSender();
             ModTutorialStatusManager.get(player.server).setHasAccessed(true);
         });
+        ctx.setPacketHandled(true);
     }
 }

@@ -1,6 +1,6 @@
 package net.jacob6.alttutorial.tutorial.network;
 
-import com.google.common.base.Supplier;
+import java.util.function.Supplier;
 
 import net.jacob6.alttutorial.tutorial.client.ModClientPacketHandler;
 import net.minecraft.network.FriendlyByteBuf;
@@ -8,7 +8,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
-public class SyncStatusToClientPacket {
+public class SyncStatusToClientPacket {// extends AbstractPacket{
     // Server -> Client message packet to sync the players' status of the tutorial
 
     public int tAccessed;
@@ -27,11 +27,11 @@ public class SyncStatusToClientPacket {
         decoder(buffer);
     }
 
-    public static void encoder(SyncStatusToClientPacket msg, FriendlyByteBuf buffer){
-        buffer.writeInt(msg.tAccessed);
-        buffer.writeInt(msg.tCrafted);
-        buffer.writeBoolean(msg.hAccessed);
-        buffer.writeBoolean(msg.hCrafted);
+    public void encoder(FriendlyByteBuf buffer){
+        buffer.writeInt(this.tAccessed);
+        buffer.writeInt(this.tCrafted);
+        buffer.writeBoolean(this.hAccessed);
+        buffer.writeBoolean(this.hCrafted);
     }
 
     public static SyncStatusToClientPacket decoder(FriendlyByteBuf buffer){

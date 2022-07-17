@@ -2,6 +2,7 @@ package net.jacob6.alttutorial;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javax.print.DocFlavor.STRING;
 

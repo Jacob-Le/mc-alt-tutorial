@@ -1,6 +1,6 @@
 package net.jacob6.alttutorial.tutorial.client;
 
-import com.google.common.base.Supplier;
+import java.util.function.Supplier;
 
 import net.jacob6.alttutorial.tutorial.network.SyncStatusToClientPacket;
 import net.jacob6.alttutorial.tutorial.data.ModTutorialStatus;

@@ -1,6 +1,5 @@
 package net.jacob6.alttutorial.entity;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -8,7 +7,6 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.jacob6.alttutorial.MCAltTutorial;
-import net.jacob6.alttutorial.block.ModBlocks;
 // import net.jacob6.alttutorial.entity.custom.CraftingTableBlockEntity;
 
 import java.util.List;
