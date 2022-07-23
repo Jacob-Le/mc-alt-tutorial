@@ -26,7 +26,7 @@ public class ModBlocks{
         DeferredRegister.create(ForgeRegistries.BLOCKS, "minecraft");
 
     public static final RegistryObject<Block> PICKAXE_BLOCK = registerBlock("pickaxe_block", 
-        () -> new PickaxeBlock(BlockBehaviour.Properties.copy(Blocks.STONE)), CreativeModeTab.TAB_MISC);
+        () -> new PickaxeBlock(BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS)), CreativeModeTab.TAB_MISC);
 
 
     // Replace crafting tables

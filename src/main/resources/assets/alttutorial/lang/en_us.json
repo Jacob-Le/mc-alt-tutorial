@@ -2,9 +2,21 @@
     "item.alttutorial.pickaxe_block": "Pickaxe Block (Item)",
     "block.alttutorial.pickaxe_block": "Pickaxe Block",
 
-    "alttutorial.access.title": "Access the Workbench",
-    "alttutorial.access.description": "Press ",
+    "alttutorial.swap.title": "Change item in main hand",
+    "alttutorial.swap.description": "Use SCROLLWHEEL or 1, 2, 3...",
 
-    "alttutorial.craft.title": "Collect the item you've just crafted",
-    "alttutorial.craft.description": "Use "
+    "alttutorial.craft_drag.title": "Craft an item",
+    "alttutorial.craft_drag.description": "Drag item to CRAFTING",
+
+    "alttutorial.craft_inventory.title": "Craft an item",
+    "alttutorial.craft_inventory.description": "Drag item from RESULT",
+
+    "alttutorial.place.title": "Place the Crafting Table",
+    "alttutorial.place.description": "Select and press Right Button",
+
+    "alttutorial.access.title": "Access the Crafting Table",
+    "alttutorial.access.description": "Press Right Button",
+
+    "alttutorial.tools.title": "The block shattered!",
+    "alttutorial.tools.description": "Better tools required"
 }

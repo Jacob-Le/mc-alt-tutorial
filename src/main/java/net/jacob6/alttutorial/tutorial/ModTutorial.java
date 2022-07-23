@@ -1,85 +1,290 @@
 package net.jacob6.alttutorial.tutorial;
 
+import com.google.common.collect.Lists;
 import com.mojang.logging.LogUtils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.util.BlockSnapshot;
+import net.minecraftforge.fml.DistExecutor;
 import net.jacob6.alttutorial.Messages;
-import net.jacob6.alttutorial.tutorial.client.ModTutorialContent;
+import net.jacob6.alttutorial.particle.ModParticles;
+import net.jacob6.alttutorial.tutorial.data.ModTutorialContent;
 import net.jacob6.alttutorial.tutorial.data.ModTutorialStatus;
+import net.jacob6.alttutorial.tutorial.ModTutorialToast;
 import net.jacob6.alttutorial.tutorial.network.AccessedCraftingTablePacket;
+import net.jacob6.alttutorial.tutorial.network.AddWastedBlockPacket;
 import net.jacob6.alttutorial.tutorial.network.CraftedItemPacket;
+import net.jacob6.alttutorial.tutorial.network.PlacedBlockPacket;
+import net.jacob6.alttutorial.tutorial.network.SwappedItemPacket;
+
+import java.util.List;
 
 import org.slf4j.Logger;
 
 @OnlyIn(Dist.CLIENT)
 public class ModTutorial{
-   private static TutorialToast accessToast;
-   private static TutorialToast craftToast;
+   private static ModTutorialToast currentToast;
+   private static List<ModTimedToast> timedToasts = Lists.newArrayList();
+   private static List<GlowInstance> glowInstances = Lists.newArrayList();
+
+   private static final int INSUFFICIENT_HINT_DURATION = 400;
+   private static final int SWAP_HINT_DURATION = 400;
+   private static final int GLOW_PARTICLE_INTERVAL = 15;
+   private static final int MAX_TOOL_PROMPTS = 7;
 
    private static final Logger LOGGER = LogUtils.getLogger();
 
-   public static void promptAccessEvent(){
-      
-     // Check if the player has already recieved the tutorial
-     if(!ModTutorialStatus.playerHasAccessed() && !ModTutorialStatus.playerHasCrafted()){
-         // if true, create a toast
+   public enum TutorialStepID{
+      NONE(-1),
+      SWAP_ITEMS(0),
+      CRAFT_DRAG_ITEM(1),
+      CRAFT_INVENTORY_ITEM(2),
+      CRAFT_DONE(3),
+      PLACE_BLOCK(4),
+      ACCESS_CRAFTING_TABLE(5),
+      ACCESS_DONE(6),
+      GET_BETTER_TOOLS(7);
 
-         accessToast = new TutorialToast(TutorialToast.Icons.RIGHT_CLICK,
-            ModTutorialContent.getAccessTitle(), 
-            ModTutorialContent.getAccessDescription(),
-            true);
+      private final int id;
 
-         // Send toast to Minecraft to display
-         Minecraft.getInstance().getToasts().addToast(accessToast);
-         LOGGER.info("------------ WOWOWEE WA WE DID A PLACE THING -------------");
+      TutorialStepID(int id){
+         this.id = id;
       }
    }
 
-   public static void handleAccessEvent(){
-      if (!ModTutorialStatus.playerHasAccessed() && !ModTutorialStatus.playerHasCrafted()){
-         // Notify server that the player has accessed the crafting table
-         Messages.sendToServer(new AccessedCraftingTablePacket());
-         clearAccessToast();
-         
-         craftToast = new TutorialToast(TutorialToast.Icons.MOUSE, 
-            ModTutorialContent.getCraftTitle(), 
-            ModTutorialContent.getCraftDescription(), 
-            true);
+   // Step 0.5 - player has more than 2 items, tell them how to swap items
+   public static void promptSwapItems() {
+      // Check if the player has already recieved the tutorial
+      if(!ModTutorialStatus.playerHasSwapped() && !hasActiveTimedToast()){
+         // Add timed toast
+         addTimedToast(new ModTutorialToast(TutorialToast.Icons.MOUSE, 
+            ModTutorialContent.SWAP_TITLE, 
+            ModTutorialContent.SWAP_DESCRIPTION,
+            true,
+            TutorialStepID.SWAP_ITEMS), SWAP_HINT_DURATION);
+
+         // Send message to server that player has swapped
+         Messages.sendToServer(new SwappedItemPacket());
+      }
+   }
+
+   // Step 1 - player opens inventory, tell them to drag item to slot
+   public static void promptCraftDragItem(){
+      // Check if the player has already recieved the tutorial
+      if(!ModTutorialStatus.playerHasCrafted()){
+
+         setCurrentToast(new ModTutorialToast(TutorialToast.Icons.MOUSE,
+            ModTutorialContent.CRAFT_DRAG_TITLE,
+            ModTutorialContent.CRAFT_DRAG_DESCRIPTION,
+            false,
+            TutorialStepID.CRAFT_DRAG_ITEM));
 
          LOGGER.info("------------ DRAG TIME -------------");
-
-         // Display crafting toast
-         Minecraft.getInstance().getToasts().addToast(craftToast);
       }
    }
 
-   public static void handleCraftedEvent(){
-      if(!ModTutorialStatus.playerHasCrafted()){
+   // Step 2 - crafting matrix has the correct items, show tell player to click and drag from result
+   public static void promptCraftToInventory(){
+      // NOTE: This will be called every tick if inventory screen is open, need to put in checks not to add too many toasts
+      if (getCurrentStep() != TutorialStepID.CRAFT_INVENTORY_ITEM && 
+            getCurrentStep() != TutorialStepID.NONE && 
+            !ModTutorialStatus.playerHasCrafted()){
+
+         LOGGER.info("------------ INVENTORY TIME -------------");
+         
+         setCurrentToast(new ModTutorialToast(TutorialToast.Icons.MOUSE, 
+            ModTutorialContent.CRAFT_INVENTORY_TITLE, 
+            ModTutorialContent.CRAFT_INVENTORY_DESCRIPTION, 
+            false,
+            TutorialStepID.CRAFT_INVENTORY_ITEM));
+      }
+   }
+
+   // Step 2.5 - player has crafted an item, hide the toast
+   public static void promptCraftDone(){
+      if(hasCurrentToast() && !ModTutorialStatus.playerHasCrafted()){
          // Notify server that the player has crafted an item
          Messages.sendToServer(new CraftedItemPacket());
-         clearCraftToast();
+         clearCurrentToast();
 
-         LOGGER.info("------------ WOWOWEE ALL DONE -------------");
+         LOGGER.info("------------ WOWOWEE CRAFTAMUNDO -------------");
       }
    }
 
-   public static void clearAccessToast() {
-      if (accessToast != null) {
-         accessToast.hide();
-         accessToast = null;
+   // Step 3 - player has crafted a crafting table, inform them how to place a block
+   public static void promptPlaceBlockHint() {
+      if(!ModTutorialStatus.playerHasPlaced()){
+         // Notify server that the player placed a block
+
+         // Display toast
+         setCurrentToast(new ModTutorialToast(TutorialToast.Icons.RIGHT_CLICK, 
+            ModTutorialContent.PLACE_TITLE, 
+            ModTutorialContent.PLACE_DESCRIPTION, 
+            false,
+            TutorialStepID.PLACE_BLOCK));
+
+         LOGGER.info("------------ What is a block -------------");
       }
    }
 
-   public static void clearCraftToast(){
-      if (craftToast != null) {
-         craftToast.hide();
-         craftToast = null;
+   // Step 4 - player has placed a crafting table, inform them how to access the table
+   public static void promptAccessEvent(BlockSnapshot snapshot){
+     // Check if the player has already recieved the tutorial
+     if(!ModTutorialStatus.playerHasAccessed()){
+         // Notify server that the player has accessed the crafting table
+
+         setCurrentToast(new ModTutorialToast(TutorialToast.Icons.RIGHT_CLICK,
+            ModTutorialContent.ACCESS_TITLE, 
+            ModTutorialContent.ACCESS_DESCRIPTION,
+            false,
+            TutorialStepID.ACCESS_CRAFTING_TABLE));
+
+         BlockPos pos = snapshot.getPos();
+
+         // Make the crafting table glow!
+         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ModTutorial.addGlowInstance(new GlowInstance(Minecraft.getInstance().level, pos, TutorialStepID.ACCESS_CRAFTING_TABLE)));
+
+         // Inform the server
+         Messages.sendToServer(new PlacedBlockPacket());
+
+         LOGGER.info(String.format("------------ WOWOWEE WA WE DID A PLACE THING AT (%d, %d, %d) -------------", pos.getX(), pos.getY(), pos.getZ()));
       }
    }
 
+   // Step 4.5 - player has accessed the crafting table, clear toasts
+   public static void promptAccessDone(){
+      if(hasCurrentToast() && !ModTutorialStatus.playerHasAccessed()){
+         clearCurrentToast();
+
+         removeGlowInstance(TutorialStepID.ACCESS_CRAFTING_TABLE);
+
+         Messages.sendToServer(new AccessedCraftingTablePacket());
+         LOGGER.info("------------ Right clicking is EASY -------------");
+      }
+   }
+
+   // Player doesn't know that they need to get better tools
+   public static void promptGetBetterToolsHint(){
+
+      // TODO: only prompt a set number of times
+      if(!hasActiveTimedToast()){
+         // Display toast
+         addTimedToast(new ModTutorialToast(TutorialToast.Icons.RECIPE_BOOK, 
+            ModTutorialContent.TOOLS_TITLE,
+            ModTutorialContent.TOOLS_DESCRIPTION, 
+            true,
+            TutorialStepID.GET_BETTER_TOOLS), INSUFFICIENT_HINT_DURATION);
+      }
+      // send message that increment number of times the player has broken a block they don't have tools for
+      Messages.sendToServer(new AddWastedBlockPacket());
+   }
+
+   public static void setCurrentToast(ModTutorialToast toast){
+      clearCurrentToast();
+      // Set the reference
+      currentToast = toast;
+      // Display the toast
+      Minecraft.getInstance().getToasts().addToast(currentToast);
+   }
+
+   public static void addTimedToast(ModTutorialToast toast, int duration){
+      timedToasts.add(new ModTimedToast(toast, duration));
+      Minecraft.getInstance().getToasts().addToast(toast);
+   }
+
+   public static void addGlowInstance(GlowInstance instance){
+      glowInstances.add(instance);
+   }
+
+   public static void removeGlowInstance(TutorialStepID id){
+      glowInstances.removeIf((instance) -> instance.id == id);
+   }
+
+   public static void clearCurrentToast(){
+      if (currentToast != null) {
+         currentToast.hide();
+         currentToast = null;
+      }
+   }
+
+   public static boolean hasCurrentToast(){
+      return currentToast != null;
+   }
+
+   public static TutorialStepID getCurrentStep(){
+      if(currentToast != null){
+         return currentToast.getID();
+      }else{
+         return TutorialStepID.NONE;
+      }
+   }
+
+   public static boolean hasActiveTimedToast(){
+      return !timedToasts.isEmpty();
+   }
+
+   public static void tick() {
+      timedToasts.removeIf(ModTimedToast::updateProgress);
+      glowInstances.forEach((glowInstance) -> glowInstance.glowPulse());
+   }
+
+   @OnlyIn(Dist.CLIENT)
+   static final class GlowInstance {
+      public final TutorialStepID id;
+      private final Level level;
+      private final BlockPos pos;
+      private int progress;
+
+      GlowInstance(Level level, BlockPos pos, TutorialStepID id){
+         this.level = level;
+         this.pos = pos;
+         this.id = id;
+         this.progress = 0;
+      }
+
+      private void glowPulse(){
+         if(++this.progress % ModTutorial.GLOW_PARTICLE_INTERVAL == 0){
+            for(int i = 0; i < 360; i++){
+               if(i % 20 == 0){
+                  this.level.addParticle(ModParticles.MOD_GLOW_PARTICLES.get(),
+                     this.pos.getX() + 0.5d, this.pos.getY(), this.pos.getZ() + 0.5d,
+                     Math.cos(i * Math.sin(this.progress)) * Mth.lerp(0.1d, 0.25d, (double) i/360), // X Velociity
+                     0.15d * (double) i/360,   // Y velocity
+                     Math.sin(i * Math.sin(this.progress)) * Mth.lerp(0.1d, 0.25d, (double) i/360)); // Z Velocity
+               }
+            }
+         }
+         if(this.progress == 100000){ this.progress = 0; }
+      }
+   }
+
+   @OnlyIn(Dist.CLIENT)
+   static final class ModTimedToast {
+      final TutorialToast toast;
+      private final int durationTicks;
+      private int progress;
+
+      ModTimedToast(TutorialToast toast, int duration) {
+         this.toast = toast;
+         this.durationTicks = duration;
+      }
+
+      private boolean updateProgress() {
+         this.toast.updateProgress(Math.min((float)(++this.progress) / (float)this.durationTicks, 1.0F));
+         if (this.progress > this.durationTicks) {
+            this.toast.hide();
+            return true;
+         } else {
+            return false;
+         }
+      }
+   }
 }
 
    

@@ -1,17 +1,12 @@
 package net.jacob6.alttutorial;
 
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
-import javax.print.DocFlavor.STRING;
-
-import net.jacob6.alttutorial.MCAltTutorial;
 import net.jacob6.alttutorial.tutorial.network.AccessedCraftingTablePacket;
+import net.jacob6.alttutorial.tutorial.network.AddWastedBlockPacket;
 import net.jacob6.alttutorial.tutorial.network.CraftedItemPacket;
+import net.jacob6.alttutorial.tutorial.network.PlacedBlockPacket;
+import net.jacob6.alttutorial.tutorial.network.SwappedItemPacket;
 import net.jacob6.alttutorial.tutorial.network.SyncStatusToClientPacket;
 
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkRegistry;
@@ -53,6 +48,27 @@ public class Messages {
             CraftedItemPacket::encoder,
             CraftedItemPacket::decoder,
             CraftedItemPacket::handle);
+
+        // Set hasSwapped to server packet message
+        INSTANCE.registerMessage(id(),
+            SwappedItemPacket.class,
+            SwappedItemPacket::encoder,
+            SwappedItemPacket::decoder, 
+            SwappedItemPacket::handle);
+        
+        // Set hasPlaced to server packet message
+        INSTANCE.registerMessage(id(),
+            PlacedBlockPacket.class,
+            PlacedBlockPacket::encoder,
+            PlacedBlockPacket::decoder, 
+            PlacedBlockPacket::handle);
+
+        // AddWastedBlock to server packet message
+        INSTANCE.registerMessage(id(),
+            AddWastedBlockPacket.class,
+            AddWastedBlockPacket::encoder,
+            AddWastedBlockPacket::decoder, 
+            AddWastedBlockPacket::handle);
     }
 
     public static <MSG> void sendToServer(MSG message){

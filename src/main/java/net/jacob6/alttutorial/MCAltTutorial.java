@@ -7,6 +7,7 @@ import net.jacob6.alttutorial.block.ModBlocks;
 import net.jacob6.alttutorial.entity.ModBlockEntities;
 import net.jacob6.alttutorial.event.ModEvents;
 import net.jacob6.alttutorial.item.ModItems;
+import net.jacob6.alttutorial.particle.ModParticles;
 import net.jacob6.alttutorial.worldgen.biome.ModBiomeModifier;
 import net.jacob6.alttutorial.worldgen.feature.ModPlacedFeatures;
 import net.jacob6.alttutorial.worldgen.structures.ModStructures;
@@ -54,6 +55,7 @@ public class MCAltTutorial
         ModPlacedFeatures.register(modEventBus);
         ModBiomeModifier.register(modEventBus);
         ModStructures.register(modEventBus);
+        ModParticles.register(modEventBus);
 
         ModEvents events = new ModEvents(); // Initialize event handler instance
 
@@ -68,6 +70,8 @@ public class MCAltTutorial
     {
         
     }
+
+    // SEED: 7221083892190558231
 
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)

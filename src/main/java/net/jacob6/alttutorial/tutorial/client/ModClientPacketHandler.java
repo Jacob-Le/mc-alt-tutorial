@@ -11,6 +11,6 @@ public class ModClientPacketHandler {
 
     // Handle sync packet on client side
     public static void handleSyncStatusPacket(SyncStatusToClientPacket msg, Supplier<NetworkEvent.Context> supplier){
-        ModTutorialStatus.set(msg.tAccessed, msg.tCrafted, msg.hAccessed, msg.hCrafted);
+        ModTutorialStatus.set(msg.tAccessed, msg.tCrafted, msg.numWasted, msg.hSwapped, msg.hPlaced, msg.hAccessed, msg.hCrafted);
     }
 }
