@@ -13,10 +13,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.fml.DistExecutor;
 import net.jacob6.alttutorial.Messages;
+import net.jacob6.alttutorial.gui.ModVignetteOverlay;
 import net.jacob6.alttutorial.particle.ModParticles;
 import net.jacob6.alttutorial.tutorial.data.ModTutorialContent;
 import net.jacob6.alttutorial.tutorial.data.ModTutorialStatus;
-import net.jacob6.alttutorial.tutorial.ModTutorialToast;
 import net.jacob6.alttutorial.tutorial.network.AccessedCraftingTablePacket;
 import net.jacob6.alttutorial.tutorial.network.AddWastedBlockPacket;
 import net.jacob6.alttutorial.tutorial.network.CraftedItemPacket;
@@ -62,6 +62,8 @@ public class ModTutorial{
    public static void promptSwapItems() {
       // Check if the player has already recieved the tutorial
       if(!ModTutorialStatus.playerHasSwapped() && !hasActiveTimedToast()){
+         LOGGER.info("------------ Player has gotten more than 1 item, tell them to swap -------------");
+
          // Add timed toast
          addTimedToast(new ModTutorialToast(TutorialToast.Icons.MOUSE, 
             ModTutorialContent.SWAP_TITLE, 
@@ -75,35 +77,57 @@ public class ModTutorial{
    }
 
    // Step 1 - player opens inventory, tell them to drag item to slot
-   public static void promptCraftDragItem(){
+   public static void promptCraftDragItem(boolean isInventory){
       // Check if the player has already recieved the tutorial
-      if(!ModTutorialStatus.playerHasCrafted()){
-
+      // NOTE: This will be called every draw if inventory screen is open, need to put in checks not to add too many toasts
+      if(!hasCurrentToast() &&
+            !ModTutorialStatus.playerHasCrafted()){
+            
+         LOGGER.info("------------ Player opened inventory, telling to drag item to slot -------------");
          setCurrentToast(new ModTutorialToast(TutorialToast.Icons.MOUSE,
             ModTutorialContent.CRAFT_DRAG_TITLE,
             ModTutorialContent.CRAFT_DRAG_DESCRIPTION,
             false,
             TutorialStepID.CRAFT_DRAG_ITEM));
-
-         LOGGER.info("------------ DRAG TIME -------------");
+      
+         // Display Vignette for dragging item -> matrix
+         if(isInventory){
+            ModVignetteOverlay.setVignetteMode(ModVignetteOverlay.VignetteMode.INVENTORY_TO_MATRIX);
+         }else{
+            ModVignetteOverlay.setVignetteMode(ModVignetteOverlay.VignetteMode.CRAFTING_TO_MATRIX);
+         }
+         // OverlayRegistry.enableOverlay(ModGui.VIGNETTE_ELEMENT, true);
       }
    }
 
    // Step 2 - crafting matrix has the correct items, show tell player to click and drag from result
-   public static void promptCraftToInventory(){
+   public static void promptCraftToInventory(boolean isInventory){
       // NOTE: This will be called every tick if inventory screen is open, need to put in checks not to add too many toasts
-      if (getCurrentStep() != TutorialStepID.CRAFT_INVENTORY_ITEM && 
+      if (getCurrentStep() == TutorialStepID.CRAFT_DRAG_ITEM && 
             getCurrentStep() != TutorialStepID.NONE && 
             !ModTutorialStatus.playerHasCrafted()){
-
-         LOGGER.info("------------ INVENTORY TIME -------------");
-         
+        
+         LOGGER.info("------------ Player has filled matrix, tell them to drag to inventory -------------");
          setCurrentToast(new ModTutorialToast(TutorialToast.Icons.MOUSE, 
             ModTutorialContent.CRAFT_INVENTORY_TITLE, 
             ModTutorialContent.CRAFT_INVENTORY_DESCRIPTION, 
             false,
             TutorialStepID.CRAFT_INVENTORY_ITEM));
+         // Display Vignette for dragging item -> inventory
+         if(isInventory){
+            ModVignetteOverlay.setVignetteMode(ModVignetteOverlay.VignetteMode.INVENTORY_TO_INVENTORY);
+         }else{
+            ModVignetteOverlay.setVignetteMode(ModVignetteOverlay.VignetteMode.CRAFTING_TO_INVENTORY);
+         }
+         // OverlayRegistry.enableOverlay(ModGui.VIGNETTE_ELEMENT, true);
+
       }
+   }
+
+   // Handle if the container is closed
+   public static void closeVignettes(){
+      ModVignetteOverlay.setVignetteMode(ModVignetteOverlay.VignetteMode.NONE);
+      clearCurrentToast();
    }
 
    // Step 2.5 - player has crafted an item, hide the toast
@@ -111,9 +135,9 @@ public class ModTutorial{
       if(hasCurrentToast() && !ModTutorialStatus.playerHasCrafted()){
          // Notify server that the player has crafted an item
          Messages.sendToServer(new CraftedItemPacket());
-         clearCurrentToast();
+         closeVignettes();
 
-         LOGGER.info("------------ WOWOWEE CRAFTAMUNDO -------------");
+         LOGGER.info("------------ Player has crafted an item, cleaning up -------------");
       }
    }
 
@@ -129,7 +153,7 @@ public class ModTutorial{
             false,
             TutorialStepID.PLACE_BLOCK));
 
-         LOGGER.info("------------ What is a block -------------");
+         LOGGER.info("------------ Player has gotten a block to place -------------");
       }
    }
 
@@ -153,7 +177,7 @@ public class ModTutorial{
          // Inform the server
          Messages.sendToServer(new PlacedBlockPacket());
 
-         LOGGER.info(String.format("------------ WOWOWEE WA WE DID A PLACE THING AT (%d, %d, %d) -------------", pos.getX(), pos.getY(), pos.getZ()));
+         LOGGER.info(String.format("------------ Placed a crafting table at (%d, %d, %d) -------------", pos.getX(), pos.getY(), pos.getZ()));
       }
    }
 
@@ -165,7 +189,7 @@ public class ModTutorial{
          removeGlowInstance(TutorialStepID.ACCESS_CRAFTING_TABLE);
 
          Messages.sendToServer(new AccessedCraftingTablePacket());
-         LOGGER.info("------------ Right clicking is EASY -------------");
+         LOGGER.info("------------ Cleaning up access tutorial step -------------");
       }
    }
 
@@ -183,6 +207,12 @@ public class ModTutorial{
       }
       // send message that increment number of times the player has broken a block they don't have tools for
       Messages.sendToServer(new AddWastedBlockPacket());
+   }
+
+   public static void handleVignetteDraw(int x, int y, int width, int height) {
+      if(getCurrentStep() == TutorialStepID.CRAFT_DRAG_ITEM || getCurrentStep() == TutorialStepID.CRAFT_INVENTORY_ITEM){
+         ModVignetteOverlay.doRender(x, y, width, height);
+      }
    }
 
    public static void setCurrentToast(ModTutorialToast toast){

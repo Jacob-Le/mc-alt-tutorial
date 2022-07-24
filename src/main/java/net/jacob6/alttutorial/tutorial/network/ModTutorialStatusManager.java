@@ -104,7 +104,7 @@ public class ModTutorialStatusManager extends SavedData{
             // There is a bug here - will complete tutorial for all players, but that is outside of the scope of this for now
             server.getPlayerList().getPlayers().forEach(player -> {
                 // if (player instanceof ServerPlayer serverPlayer){
-                Messages.sendToPlayer((ServerPlayer) player, new SyncStatusToClientPacket( this.timeAccessed, this.timeCrafted, this.numWastedBlocks, this.hasSwapped, this.hasPlaced, this.hasAccessed, this.hasCrafted));
+                Messages.sendToPlayer((ServerPlayer) player, new SyncStatusToClientPacket(this.timeAccessed, this.timeCrafted, this.numWastedBlocks, this.hasSwapped, this.hasPlaced, this.hasAccessed, this.hasCrafted));
                 // }
             });
         }

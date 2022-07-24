@@ -1,11 +1,10 @@
 package net.jacob6.alttutorial.event;
 
-import org.lwjgl.opengl.GL11;
-
 import net.jacob6.alttutorial.MCAltTutorial;
 import net.jacob6.alttutorial.tutorial.ModTutorial;
 import net.jacob6.alttutorial.tutorial.network.ModTutorialStatusManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CraftingScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.util.Mth;
@@ -19,10 +18,10 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderBlockOverlayEvent;
 import net.minecraftforge.client.event.ScreenOpenEvent;
-import net.minecraftforge.client.event.ScreenEvent.MouseClickedEvent;
+import net.minecraftforge.client.event.ScreenEvent.DrawScreenEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.ItemCraftedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.ItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
@@ -55,10 +54,25 @@ public class ModEvents {
     @SubscribeEvent
     public static void onInventoryOpen(ScreenOpenEvent event){
         // Screen open is always client side
-        if(event.getScreen() instanceof InventoryScreen || event.getScreen() instanceof CraftingScreen){
-            ModTutorial.promptCraftDragItem();
+        if(event.getScreen() instanceof InventoryScreen inventory){
+            ModTutorial.promptCraftDragItem(true);
+            System.out.println(String.format("(%d, %d) vs (%d, %d)", 
+                inventory.width, inventory.height,
+                inventory.getXSize(), inventory.getYSize()));
+        }else if(event.getScreen() instanceof CraftingScreen crafting){
+            ModTutorial.promptCraftDragItem(false);
+            System.out.println(String.format("(%d, %d) vs (%d, %d)", 
+                crafting.width, crafting.height,
+                crafting.getXSize(), crafting.getYSize()));
         }
-    } 
+    }
+
+    @SubscribeEvent
+    public static void onInventoryClose(PlayerContainerEvent.Close event){
+        if(event.getContainer() instanceof InventoryMenu || event.getContainer() instanceof CraftingMenu){
+            ModTutorial.closeVignettes();
+        }
+    }
 
     // Remove the drag to craft toast when the item is crafted
     @SubscribeEvent
@@ -104,7 +118,6 @@ public class ModEvents {
     public static void onInsufficientToolBreak(BreakEvent event){        
         Player player = event.getPlayer();
         if(!player.level.isClientSide()){
-            System.out.println("Broke a block!");
 
             // Code copied from vanilla Item class - calculate what block the player is looking at
             float f = player.getXRot();
@@ -125,9 +138,17 @@ public class ModEvents {
 
             // Check if the player has the correct tool they need in order for items to drop
             if(!player.hasCorrectToolForDrops(bState)){
-                System.out.println("Wasted a block!");
                 ModTutorial.promptGetBetterToolsHint();
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPostDrawOverlay(DrawScreenEvent.Post event){
+        if(event.getScreen() instanceof InventoryScreen inventory){
+            ModTutorial.handleVignetteDraw(inventory.getGuiLeft(), inventory.getGuiTop(), inventory.getXSize(), inventory.getYSize());
+        }else if(event.getScreen() instanceof CraftingScreen crafting){
+            ModTutorial.handleVignetteDraw(crafting.getGuiLeft(), crafting.getGuiTop(), crafting.getXSize(), crafting.getYSize());
         }
     }
 
@@ -137,16 +158,15 @@ public class ModEvents {
             return;
         }
         // Check to see if the matrix is filled with an item
-        Minecraft minecraft = Minecraft.getInstance();
-        if(minecraft.screen instanceof InventoryScreen inventory){
+        if(Minecraft.getInstance().screen instanceof InventoryScreen inventory){
             InventoryMenu menu = inventory.getMenu();
             if(menu.getSlot(menu.getResultSlotIndex()).getItem() != ItemStack.EMPTY){
-                ModTutorial.promptCraftToInventory();
+                ModTutorial.promptCraftToInventory(true);
             }
-        }else if(minecraft.screen instanceof CraftingScreen crafting){
+        }else if(Minecraft.getInstance().screen instanceof CraftingScreen crafting){
             CraftingMenu menu = crafting.getMenu();
             if(menu.getSlot(menu.getResultSlotIndex()).getItem() != ItemStack.EMPTY){
-                ModTutorial.promptCraftToInventory();
+                ModTutorial.promptCraftToInventory(false);
             }
         }
     }
