@@ -44,18 +44,18 @@ authors="jacob6@gatech.edu" #optional
 description='''
 A set of alternative tutorials developed for OMSCS cs6460.
 '''
-# A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
-[[dependencies.alttutorial]] #optional
-    # the modid of the dependency
-    modId="alttutorial" #mandatory
-    # Does this dependency have to exist - if not, ordering below must be specified
-    mandatory=true #mandatory
-    # The version range of the dependency
-    versionRange="[41,)" #mandatory
-    # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
-    ordering="NONE"
-    # Side this dependency is applied on - BOTH, CLIENT or SERVER
-    side="BOTH"
+# # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
+# [[dependencies.alttutorial]] #optional
+#     # the modid of the dependency
+#     modId="alttutorial" #mandatory
+#     # Does this dependency have to exist - if not, ordering below must be specified
+#     mandatory=true #mandatory
+#     # The version range of the dependency
+#     versionRange="[41,)" #mandatory
+#     # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
+#     ordering="NONE"
+#     # Side this dependency is applied on - BOTH, CLIENT or SERVER
+#     side="BOTH"
 # Here's another dependency
 [[dependencies.alttutorial]]
     modId="minecraft"

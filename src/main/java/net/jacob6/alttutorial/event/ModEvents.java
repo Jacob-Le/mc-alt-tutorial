@@ -12,6 +12,8 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CraftingScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.util.Mth;
+import net.minecraft.util.profiling.jfr.event.WorldLoadFinishedEvent;
+import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -22,20 +24,19 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.ScreenOpenEvent;
-import net.minecraftforge.client.event.ScreenEvent.DrawScreenEvent;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.ItemCraftedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.ItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.ItemSmeltedEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
-import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.event.world.BlockEvent.BreakEvent;
-import net.minecraftforge.event.world.BlockEvent.EntityPlaceEvent;
+import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.event.level.BlockEvent.BreakEvent;
+import net.minecraftforge.event.level.BlockEvent.EntityPlaceEvent;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
+import net.minecraftforge.event.TickEvent.LevelTickEvent;
 import net.minecraftforge.event.TickEvent.ServerTickEvent;
-import net.minecraftforge.event.TickEvent.WorldTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -48,17 +49,22 @@ public class ModEvents {
     @SubscribeEvent
     public static void onItemsGotten(ItemPickupEvent event){
         if(!event.getEntity().level.isClientSide){
-            Player player = event.getPlayer();
+            Player player = event.getEntity();
             // When the player has enough items, handle the event
             if(player.getInventory().items.size() >= 1){
                 ModTutorial.promptSwapItems();
+            }
+
+            // Check if item is a stone pickaxe
+            if(event.getStack().getItem() == Items.STONE_PICKAXE){
+                ModTutorial.recordCraftedItem(event.getStack().getItem());
             }
         }
     }
 
     // Check to see if the inventory has been opened - display click to drag hint
     @SubscribeEvent
-    public static void onInventoryOpen(ScreenOpenEvent event){
+    public static void onInventoryOpen(ScreenEvent.Opening event){
         // Screen open is always client side
         if(event.getScreen() instanceof InventoryScreen inventory){
             ModTutorial.promptCraftDragItem(true);
@@ -117,8 +123,8 @@ public class ModEvents {
 
     @SubscribeEvent
     public static void onRightClickCraftingTable(RightClickBlock event){
-        if(!event.getWorld().isClientSide()){
-            BlockState state = event.getWorld().getBlockState(event.getHitVec().getBlockPos());
+        if(!event.getEntity().level.isClientSide()){
+            BlockState state = event.getEntity().level.getBlockState(event.getHitVec().getBlockPos());
             if(state.getBlock() == Blocks.CRAFTING_TABLE){
                 ModTutorial.promptAccessDone();
             }
@@ -165,7 +171,7 @@ public class ModEvents {
     }
 
     @SubscribeEvent
-    public static void onPostDrawOverlay(DrawScreenEvent.Post event){
+    public static void onPostDrawOverlay(ScreenEvent.Render.Post event){
         if(event.getScreen() instanceof InventoryScreen inventory){
             ModTutorial.handleVignetteDraw(inventory.getGuiLeft(), inventory.getGuiTop(), inventory.getXSize(), inventory.getYSize());
         }else if(event.getScreen() instanceof CraftingScreen crafting){
@@ -194,8 +200,8 @@ public class ModEvents {
 
     // Handle the world tick
     @SubscribeEvent
-    public static void onWorldTick(WorldTickEvent event){
-        if (event.world.isClientSide()){ // Check if is client side
+    public static void onWorldTick(LevelTickEvent event){
+        if (event.level.isClientSide()){ // Check if is client side
             return;
         }
         if (event.phase == TickEvent.Phase.START){
@@ -215,7 +221,7 @@ public class ModEvents {
     }
 
     @SubscribeEvent
-    public static void onSave(WorldEvent.Save event){
+    public static void onSave(LevelEvent.Save event){
         System.out.println("DEV SAVING STATS");
         Messages.sendToServer(new DevExportStatsPacket());
     }

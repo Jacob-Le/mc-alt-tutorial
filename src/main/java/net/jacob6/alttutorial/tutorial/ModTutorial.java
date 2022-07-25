@@ -122,7 +122,9 @@ public class ModTutorial{
    // Handle if the container is closed
    public static void closeVignettes(){
       ModVignetteOverlay.setVignetteMode(ModVignetteOverlay.VignetteMode.NONE);
-      clearCurrentToast();
+      if(getCurrentStep() == TutorialStepID.CRAFT_DRAG_ITEM || getCurrentStep() == TutorialStepID.CRAFT_INVENTORY_ITEM){
+         clearCurrentToast();
+      }
    }
 
    // Step 2.5 - player has crafted an item, hide the toast
