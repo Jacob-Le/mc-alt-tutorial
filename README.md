@@ -60,12 +60,20 @@
     * Minecraft distribution: Press play in the launcher
     * Eclipse / IDEA: run button
     * Visual Studio Code: execute the forgegradle runs/runClient task
-2. Your task within the game is to obtain a Copper Ingot.  Additional instructions will come from within the game and from exploration.
-3. Once the copper ingot has been collected, exit out of the game.
-4. Find the `results.zip` file
+3. Wait for the main menu to load, select Singleplayer
+    * Minecraft distribution - world setup:
+        1. Select peaceful difficulty
+        2. Set game mode to "Survival"
+        3. Select "More World Options"
+        4. Copy + Paste in the following seed: `7221083892190558231`
+        5. Select Create New World
+4. Your task within the game is to obtain a Copper Ingot.  Additional instructions will come from within the game and from exploration.
+5. Once the copper ingot has been collected, exit out of the game.
+6. Find the `results.zip` file
     * If using an IDE, it is located here: `mc-alt-tutorial/run/results.zip`
     * If using Minecraft launcher on Windows, it is located here: `C:\Users\<USER>\AppData\Roaming\.minecraft\results.zip` 
-5. Answer the questions in the linked survey and attach the `results.zip` file.
+7. Answer the questions in the linked survey and attach the `results.zip` file.
+8. Direct all questions towards the Piazza post at: https://piazza.com/class/l2zfw553n634xg?cid=246
 
 ## Minecraft Controls
 Information about the controls will be provided in-game, but this will be here for reference in case you forget.
