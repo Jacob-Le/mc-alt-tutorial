@@ -1,29 +1,30 @@
-package net.jacob6.alttutorial.tutorial.network;
+package net.jacob6.alttutorial.tutorial.network.packets;
 
 import java.util.function.Supplier;
 
+import net.jacob6.alttutorial.tutorial.network.ModTutorialStatusManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
 
-public class CraftedItemPacket{
-    public CraftedItemPacket() {
+public class AddWastedBlockPacket{
+    public AddWastedBlockPacket() {
         
     }
 
     public void encoder(FriendlyByteBuf buffer) {
     }
 
-    public static CraftedItemPacket decoder(FriendlyByteBuf buffer) {
-        return new CraftedItemPacket();
+    public static AddWastedBlockPacket decoder(FriendlyByteBuf buffer) {
+        return new AddWastedBlockPacket();
     }
 
     // Handle receiving this packet on the server side
-    public static void handle(CraftedItemPacket msg, Supplier<NetworkEvent.Context> supplier) {
+    public static void handle(AddWastedBlockPacket msg, Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context ctx = supplier.get();
         ctx.enqueueWork(() -> {
             ServerPlayer player = ctx.getSender();
-            ModTutorialStatusManager.get(player.server).setHasCrafted(true);
+            ModTutorialStatusManager.get(player.server).addWastedBlock();
         });
         ctx.setPacketHandled(true);
     }

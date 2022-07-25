@@ -7,6 +7,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -17,11 +19,7 @@ import net.jacob6.alttutorial.gui.ModVignetteOverlay;
 import net.jacob6.alttutorial.particle.ModParticles;
 import net.jacob6.alttutorial.tutorial.data.ModTutorialContent;
 import net.jacob6.alttutorial.tutorial.data.ModTutorialStatus;
-import net.jacob6.alttutorial.tutorial.network.AccessedCraftingTablePacket;
-import net.jacob6.alttutorial.tutorial.network.AddWastedBlockPacket;
-import net.jacob6.alttutorial.tutorial.network.CraftedItemPacket;
-import net.jacob6.alttutorial.tutorial.network.PlacedBlockPacket;
-import net.jacob6.alttutorial.tutorial.network.SwappedItemPacket;
+import net.jacob6.alttutorial.tutorial.network.packets.*;
 
 import java.util.List;
 
@@ -96,7 +94,6 @@ public class ModTutorial{
          }else{
             ModVignetteOverlay.setVignetteMode(ModVignetteOverlay.VignetteMode.CRAFTING_TO_MATRIX);
          }
-         // OverlayRegistry.enableOverlay(ModGui.VIGNETTE_ELEMENT, true);
       }
    }
 
@@ -119,8 +116,6 @@ public class ModTutorial{
          }else{
             ModVignetteOverlay.setVignetteMode(ModVignetteOverlay.VignetteMode.CRAFTING_TO_INVENTORY);
          }
-         // OverlayRegistry.enableOverlay(ModGui.VIGNETTE_ELEMENT, true);
-
       }
    }
 
@@ -314,6 +309,44 @@ public class ModTutorial{
             return false;
          }
       }
+   }
+
+   public static void recordCraftedItem(Item item) {
+      // Check when crafting table is crafted
+      if(item == Items.CRAFTING_TABLE){
+         Messages.sendToServer(new CompletedCraftingTablePacket());
+      }
+
+      // Check when wooden pickaxe is crafted
+      if(item == Items.WOODEN_PICKAXE){
+         Messages.sendToServer(new CompletedWPickaxePacket());
+      }
+
+      // Check when stone pickaxe is crafted
+      if(item == Items.STONE_PICKAXE){
+         Messages.sendToServer(new CompletedSPickaxePacket());
+      }
+
+      // Check when furnace is crafted
+      if(item == Items.FURNACE){
+         Messages.sendToServer(new CompletedFurnacePacket());
+      }
+   }
+
+   public static void recordSmeltedItem(Item item) {
+      // Check when copper ingot is smelted
+      if(item == Items.COPPER_INGOT){
+         Messages.sendToServer(new CompletedCopperPacket());
+      }
+   }
+
+   public static void recordLogGotten() {
+      // Check if log has been broken and if it has been recorded before
+      Messages.sendToServer(new CompletedLogPacket());
+   }
+
+   public static void recordPickaxeBlockGotten() {
+      Messages.sendToServer(new AddPickaxeBlockPacket());
    }
 }
 

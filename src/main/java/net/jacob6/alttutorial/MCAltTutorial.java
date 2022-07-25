@@ -4,7 +4,6 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 
 import net.jacob6.alttutorial.block.ModBlocks;
-import net.jacob6.alttutorial.entity.ModBlockEntities;
 import net.jacob6.alttutorial.event.ModEvents;
 import net.jacob6.alttutorial.item.ModItems;
 import net.jacob6.alttutorial.particle.ModParticles;
@@ -51,7 +50,6 @@ public class MCAltTutorial
 
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
-        ModBlockEntities.register(modEventBus);
         ModPlacedFeatures.register(modEventBus);
         ModBiomeModifier.register(modEventBus);
         ModStructures.register(modEventBus);

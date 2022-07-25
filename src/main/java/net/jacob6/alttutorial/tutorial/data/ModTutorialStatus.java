@@ -2,40 +2,41 @@ package net.jacob6.alttutorial.tutorial.data;
 
 public class ModTutorialStatus {
     // Client side status
-    private static boolean hasSwapped;
-    private static boolean hasPlaced;
-    private static int timeAccessed;
-    private static int timeCrafted;
-    private static boolean hasAccessed;
-    private static boolean hasCrafted;
-    private static int numWastedBlocks;
+    private static int timeAccessed = -1;
+    private static int timeCrafted = -1;
+    private static int timeLog = -1;
+    private static int timeCraftingTable = -1;
+    private static int timeWPick = -1;
+    private static int timeSPick = -1;
+    private static int timeFurnace = -1;
+    private static int timeCopper = -1;
+    private static int numWasted = -1;
+    private static int numWastedBlocks = 0;
+    private static int numPickaxeBlock = 0;
+    private static boolean hasSwapped = false;
+    private static boolean hasPlaced = false;
+    private static boolean hasAccessed = false;
+    private static boolean hasCrafted = false;
 
     // Setters
-    public static void set(int tAccessed, int tCrafted, int numWasted, boolean hSwapped, boolean hPlaced, boolean hAccessed, boolean hCrafted){
+    public static void set(int tAccessed, int tCrafted, 
+        int tLog, int tCraftingTable, int tWPick, int tSPick, int tFurnance, int tCopper,
+        int numWasted,  int numPickaxe,
+        boolean hSwapped, boolean hPlaced, boolean hAccessed, boolean hCrafted){
+        
         timeAccessed = tAccessed;
         timeCrafted = tCrafted;
+        timeLog = tLog;
+        timeCraftingTable = tCraftingTable;
+        timeWPick = tWPick;
+        timeSPick = tSPick;
+        timeFurnace = tFurnance;
+        timeCopper = tCopper;
         numWastedBlocks = numWasted;
+        numPickaxeBlock = numPickaxe;
         hasSwapped = hSwapped;
         hasPlaced = hPlaced;
         hasAccessed = hAccessed;
-        hasCrafted = hCrafted;
-    }
-    public static void setTimeAccessed(int tAccessed) {
-        timeAccessed = tAccessed;
-    }
-    public static void setTimeCrafted(int tCrafted) {
-        timeCrafted = tCrafted;
-    }
-    public static void setHasSwapped(boolean hSwapped) {
-        hasSwapped = hSwapped;
-    }
-    public static void setHasPlaced(boolean hPlaced) {
-        hasPlaced = hPlaced;
-    }
-    public static void setHasAccessed(boolean hAccessed) {
-        hasAccessed = hAccessed;
-    }
-    public static void setHasCrafted(boolean hCrafted) {
         hasCrafted = hCrafted;
     }
     
@@ -45,6 +46,30 @@ public class ModTutorialStatus {
     }
     public static int getTimeCrafted() {
         return timeCrafted;
+    }
+    public static int getTimeLog() {
+        return timeLog;
+    }
+    public static int getTimeCraftingTable() {
+        return timeCraftingTable;
+    }
+    public static int getTimeWPick() {
+        return timeWPick;
+    }
+    public static int getTimeSPick() {
+        return timeSPick;
+    }
+    public static int getTimeFurnace() {
+        return timeFurnace;
+    }
+    public static int getTimeCopper() {
+        return timeCopper;
+    }
+    public static int getNumWasted() {
+        return numWasted;
+    }
+    public static int getNumPickaxeBlock() {
+        return numPickaxeBlock;
     }
     public static boolean playerHasSwapped() {
         return hasSwapped;
@@ -63,7 +88,14 @@ public class ModTutorialStatus {
     }
     
 
-    public ModTutorialStatus(int tAccessed, int tCrafted, int numWasted, boolean hSwapped, boolean hPlaced, boolean hAccessed, boolean hCrafted){
-        set(tAccessed, tCrafted, numWasted, hSwapped, hPlaced, hAccessed, hCrafted);
+    public ModTutorialStatus(int tAccessed, int tCrafted, 
+        int tLog, int tCraftingTable, int tWPick, int tSPick, int tFurnance, int tCopper,
+        int numWasted,  int numPickaxe,
+        boolean hSwapped, boolean hPlaced, boolean hAccessed, boolean hCrafted){
+
+        set(tAccessed, tCrafted, 
+            tLog, tCraftingTable, tWPick, tSPick, tFurnance, tCopper,
+            numWasted, numPickaxe, 
+            hSwapped, hPlaced, hAccessed, hCrafted);
     }
 }

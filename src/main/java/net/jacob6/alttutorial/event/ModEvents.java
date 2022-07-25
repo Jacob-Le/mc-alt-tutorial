@@ -1,8 +1,12 @@
 package net.jacob6.alttutorial.event;
 
 import net.jacob6.alttutorial.MCAltTutorial;
+import net.jacob6.alttutorial.Messages;
+import net.jacob6.alttutorial.block.custom.PickaxeBlock;
 import net.jacob6.alttutorial.tutorial.ModTutorial;
 import net.jacob6.alttutorial.tutorial.network.ModTutorialStatusManager;
+import net.jacob6.alttutorial.tutorial.network.packets.DevExportStatsPacket;
+import net.jacob6.alttutorial.tutorial.network.packets.DevResetStatsPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CraftingScreen;
@@ -24,7 +28,9 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.ItemCraftedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.ItemPickupEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.ItemSmeltedEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.event.world.BlockEvent.EntityPlaceEvent;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
@@ -56,14 +62,8 @@ public class ModEvents {
         // Screen open is always client side
         if(event.getScreen() instanceof InventoryScreen inventory){
             ModTutorial.promptCraftDragItem(true);
-            System.out.println(String.format("(%d, %d) vs (%d, %d)", 
-                inventory.width, inventory.height,
-                inventory.getXSize(), inventory.getYSize()));
         }else if(event.getScreen() instanceof CraftingScreen crafting){
             ModTutorial.promptCraftDragItem(false);
-            System.out.println(String.format("(%d, %d) vs (%d, %d)", 
-                crafting.width, crafting.height,
-                crafting.getXSize(), crafting.getYSize()));
         }
     }
 
@@ -79,6 +79,15 @@ public class ModEvents {
     public static void onInitialCraftItem(ItemCraftedEvent event){
         if(!event.getEntity().level.isClientSide()){
             ModTutorial.promptCraftDone();
+            ModTutorial.recordCraftedItem(event.getCrafting().getItem());
+        }
+    }
+
+    // Record when Copper ingot is smelted
+    @SubscribeEvent
+    public static void onSmeltItem(ItemSmeltedEvent event){
+        if(!event.getEntity().level.isClientSide()){
+            ModTutorial.recordSmeltedItem(event.getSmelting().getItem());
         }
     }
 
@@ -99,6 +108,9 @@ public class ModEvents {
             // Check if the block is a crafting table block
             if(event.getPlacedBlock().getBlock() == Blocks.CRAFTING_TABLE){
                 ModTutorial.promptAccessEvent(event.getBlockSnapshot());
+            }else if(event.getPlacedBlock().getBlock() instanceof PickaxeBlock){
+                System.out.println("RESETTING STATS");
+                Messages.sendToServer(new DevResetStatsPacket());
             }
         }
     }
@@ -139,6 +151,15 @@ public class ModEvents {
             // Check if the player has the correct tool they need in order for items to drop
             if(!player.hasCorrectToolForDrops(bState)){
                 ModTutorial.promptGetBetterToolsHint();
+            }
+
+            // Check when player breaks a log
+            if(bState.getBlock() == Blocks.OAK_LOG || bState.getBlock() == Blocks.BIRCH_LOG){
+                ModTutorial.recordLogGotten();
+            }
+
+            if(bState.getBlock() instanceof PickaxeBlock){
+                ModTutorial.recordPickaxeBlockGotten();
             }
         }
     }
@@ -191,5 +212,11 @@ public class ModEvents {
         }
         ModTutorialStatusManager manager = ModTutorialStatusManager.get(event.getServer());
         manager.tick(event.getServer());
+    }
+
+    @SubscribeEvent
+    public static void onSave(WorldEvent.Save event){
+        System.out.println("DEV SAVING STATS");
+        Messages.sendToServer(new DevExportStatsPacket());
     }
 }

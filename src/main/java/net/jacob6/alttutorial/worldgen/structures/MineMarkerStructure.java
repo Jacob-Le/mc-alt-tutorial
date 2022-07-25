@@ -110,9 +110,6 @@ public class MineMarkerStructure extends Structure {
             return Optional.empty();
         }
 
-        // Set's our spawning blockpos's y offset to be 60 blocks up.
-        // Since we are going to have heightmap/terrain height spawning set to true further down, this will make it so we spawn 60 blocks above terrain.
-        // If we wanted to spawn on ocean floor, we would set heightmap/terrain height spawning to false and the grab the y value of the terrain with OCEAN_FLOOR_WG heightmap.
         int startY = this.startHeight.sample(context.random(), new WorldGenerationContext(context.chunkGenerator(), context.heightAccessor()));
 
         // Turns the chunk coordinates into actual coordinates we can use. (Gets corner of that chunk)
@@ -132,12 +129,6 @@ public class MineMarkerStructure extends Structure {
                         // Set this to false for structure to be place only at the passed in blockpos's Y value instead.
                         // Definitely keep this false when placing structures in the nether as otherwise, heightmap placing will put the structure on the Bedrock roof.
                         this.maxDistanceFromCenter); // Maximum limit for how far pieces can spawn from center. You cannot set this bigger than 128 or else pieces gets cutoff.
-
-        /*
-         * Note, you are always free to make your own JigsawPlacement class and implementation of how the structure
-         * should generate. It is tricky but extremely powerful if you are doing something that vanilla's jigsaw system cannot do.
-         * Such as for example, forcing 3 pieces to always spawn every time, limiting how often a piece spawns, or remove the intersection limitation of pieces.
-         */
 
         // Return the pieces generator that is now set up so that the game runs it when it needs to create the layout of structure pieces.
         return structurePiecesGenerator;

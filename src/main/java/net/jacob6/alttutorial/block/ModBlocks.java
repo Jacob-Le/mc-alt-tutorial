@@ -1,7 +1,6 @@
 package net.jacob6.alttutorial.block;
 
 import net.jacob6.alttutorial.MCAltTutorial;
-import net.jacob6.alttutorial.block.custom.AltCraftingTableBlock;
 import net.jacob6.alttutorial.block.custom.PickaxeBlock;
 import net.jacob6.alttutorial.item.ModItems;
 import net.minecraft.world.item.BlockItem;
@@ -10,7 +9,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.material.Material;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -27,17 +25,6 @@ public class ModBlocks{
 
     public static final RegistryObject<Block> PICKAXE_BLOCK = registerBlock("pickaxe_block", 
         () -> new PickaxeBlock(BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS)), CreativeModeTab.TAB_MISC);
-
-
-    // Replace crafting tables
-    // public static final RegistryObject<Block> CRAFTING_TABLE = registerVanillaBlock("crafting_table", 
-    //     () -> new AltCraftingTableBlock(BlockBehaviour.Properties.copy(Blocks.CRAFTING_TABLE)), 
-    //     CreativeModeTab.TAB_BUILDING_BLOCKS);
-
-    
-    // public static final RegistryObject<Block> BEDROCK = registerVanillaBlock("bedrock", 
-    //     () -> new Block(BlockBehaviour.Properties.copy(Blocks.BEDROCK)), CreativeModeTab.TAB_BUILDING_BLOCKS);
-
 
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block, CreativeModeTab tab){
         RegistryObject<T> toReturn = BLOCKS.register(name, block);
